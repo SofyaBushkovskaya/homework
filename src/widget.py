@@ -17,5 +17,11 @@ def get_mask_account_card(number: str) -> str:
 
 def get_new_data(old_data: str) -> str:
     """Функция принимает строку с датой и форматирует её"""
-    data_slise = old_data[0:10].split("-")
-    return ".".join(data_slise[::-1])
+    if len(old_data) > 0:
+        if len(old_data) == 26:
+            result = old_data[:10].split("-")
+            new_data = ".".join(result[::-1])
+            return new_data
+        else:
+            return ""
+    return ""
