@@ -1,5 +1,5 @@
 import pytest
-from src.widget import get_new_data, get_mask_account_card
+from src.widget import get_mask_account_card, get_new_data
 
 
 def tset_get_mask_account_card() -> None:
