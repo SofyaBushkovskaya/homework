@@ -1,5 +1,7 @@
 import pprint
+from typing import Union
 
+from src.decorators import log
 from src.generators import card_number_generator, filter_by_currency, transaction_descriptions
 from src.processing import filter_by_state, sort_by_date
 from src.widget import get_mask_account_card, get_new_data
@@ -112,3 +114,20 @@ for i in range(5):
 print()
 for card_number in card_number_generator(1, 5):
     print(card_number)
+
+
+@log(filename="../log/mylog.txt")
+def my_function(x: int, y: int) -> Union[int, float]:
+    return x + y
+
+
+my_function(1, 2)
+
+
+@log(filename="../log/mylog.txt")
+def my_function_error(x: int, y: int) -> Union[int, float]:
+    """Функция вызова декоратора с ошибкой и сохранения вывода в файл 'mylog.txt'."""
+    return x / y
+
+
+my_function_error(5, 0)
