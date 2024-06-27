@@ -1,5 +1,4 @@
 import os
-from typing import Any
 
 import requests
 from dotenv import load_dotenv
@@ -10,12 +9,12 @@ API_KEY = os.getenv("API_KEY")
 API_URL = "https://api.apilayer.com/exchangerates_data/convert?to={to}&from={from_}&amount={amount}"
 
 
-def currency_conversion(transaction: dict) -> Any:
+def currency_conversion(transaction: dict) -> float:
     """Конвертируем валюту через API и возвращаем его"""
     amount = transaction.get("operationAmount", {}).get("amount")
     currency = transaction.get("operationAmount", {}).get("currency", {}).get("code")
     if currency == "RUB":
-        return amount
+        return float(amount)
     elif currency in ["USD", "EUR"]:
         try:
             response = requests.get(
