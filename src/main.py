@@ -1,9 +1,10 @@
+import os.path
 import pprint
-from typing import Union
 
-from src.decorators import log
+from src.external_api import currency_conversion
 from src.generators import card_number_generator, filter_by_currency, transaction_descriptions
 from src.processing import filter_by_state, sort_by_date
+from src.utils import financial_transactions
 from src.widget import get_mask_account_card, get_new_data
 
 print(get_mask_account_card("MasterCard 7158300734726758"))
@@ -115,19 +116,11 @@ print()
 for card_number in card_number_generator(1, 5):
     print(card_number)
 
-
-@log(filename="../log/mylog.txt")
-def my_function(x: int, y: int) -> Union[int, float]:
-    return x + y
-
-
-my_function(1, 2)
+current_dir = os.path.dirname(os.path.abspath(__file__))
+file_path = os.path.join(current_dir, "../data", "operations.json")
+transactions1 = financial_transactions(file_path)
 
 
-@log(filename="../log/mylog.txt")
-def my_function_error(x: int, y: int) -> Union[int, float]:
-    """Функция вызова декоратора с ошибкой и сохранения вывода в файл 'mylog.txt'."""
-    return x / y
-
-
-my_function_error(5, 0)
+for transaction in transactions1:
+    rub_amount = currency_conversion(transaction)
+    print(f"Transaction amount in RUB: {rub_amount}")
