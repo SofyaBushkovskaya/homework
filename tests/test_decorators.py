@@ -13,7 +13,7 @@ def test_log_file() -> None:
         return x * y
 
     result = example_function(3, 10)
-    with open(os.path.join(r"../log", "mylog.txt"), "rt") as file:
+    with open(os.path.join(r"../logs", "mylog.txt"), "rt") as file:
         for line in file:
             message = line
 
@@ -45,7 +45,7 @@ def test_log_file_raise() -> None:
     with pytest.raises(ValueError, match="Что то пошло не так"):
         example_function(3, 10)
 
-    with open(os.path.join(r"../log", "mylog.txt"), "rt") as file:
+    with open(os.path.join(r"../logs", "mylog.txt"), "rt") as file:
         for line in file:
             massage = line
 

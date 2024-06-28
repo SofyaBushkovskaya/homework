@@ -23,9 +23,9 @@ def log(filename: Optional[str] = None) -> Callable:
 
             finally:
                 if filename:  # Запись лога в файл.
-                    if not os.path.exists(r"../log"):
-                        os.mkdir(r"../log")  # Создать папку "logs", если ее нет.
-                    with open(os.path.join(r"../log", filename), "at") as file:
+                    if not os.path.exists(r"../logs"):
+                        os.mkdir(r"../logs")  # Создать папку "logs", если ее нет.
+                    with open(os.path.join(r"../logs", filename), "at") as file:
                         file.write(log_str + "\n")
 
                 else:  # Вывод лога в консоль.
