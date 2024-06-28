@@ -1,9 +1,11 @@
 import logging
 
-logging.basicConfig(level=logging.INFO,
-                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                    filename="../logs/application.log",
-                    filemode='w')
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    filename="../logs/application.log",
+    filemode="w",
+)
 
 logger = logging.getLogger("masks")
 
@@ -17,7 +19,7 @@ def get_mask_card(number: str) -> str:
             logger.info(f"Возвращаем маску карты: {new_string}")
             return new_string
         else:
-            logger.info(f"Ошибка, возвращаем пустую строку")
+            logger.info("Ошибка, возвращаем пустую строку")
             return ""
     return ""
 
@@ -31,6 +33,6 @@ def get_mask_account(number: str) -> str:
             logger.info(f"Возвращаем маску счёта: {new_string}")
             return new_string
         else:
-            logger.info(f"Ошибка, возвращаем пустую строку")
+            logger.info("Ошибка, возвращаем пустую строку")
             return ""
     return ""
