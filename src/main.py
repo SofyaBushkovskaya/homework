@@ -1,11 +1,10 @@
 import os
 import pprint
 
-import pandas as pd
 from src.external_api import currency_conversion
 from src.generators import card_number_generator, filter_by_currency, transaction_descriptions
 from src.processing import filter_by_state, sort_by_date
-from src.utils import financial_transactions
+from src.utils import financial_transactions, get_transactions_info_csv, get_transactions_info_excel
 from src.widget import get_mask_account_card, get_new_data
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -131,22 +130,8 @@ for transaction in transactions1:
     print(f"Transaction amount in RUB: {rub_amount}")
 
 
-def get_transaction_csv_data(path_to_csv):
-    """Функция принимает путь до файла CSV и возвращает данные транзакций"""
-    with open(path_to_csv, "r") as file:
-        data = pd.read_csv(file)
-        return data
-
-
-def get_transaction_xlsx_data(path_to_xlsx):
-    """Функция принимает путь до файла XLSX и возвращает данные транзакций"""
-    with open(path_to_xlsx, "rb") as file:
-        data = pd.read_excel(file)
-        return data
-
-
 if __name__ == "__main__":
-    data = get_transaction_csv_data(path_to_csv)
+    data = get_transactions_info_csv(path_to_csv)
     print(data.head())
-    data = get_transaction_xlsx_data(path_to_xlsx)
+    data = get_transactions_info_excel(path_to_xlsx)
     print(data.head())
