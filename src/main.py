@@ -1,11 +1,15 @@
-import os.path
+import os
 import pprint
 
 from src.external_api import currency_conversion
 from src.generators import card_number_generator, filter_by_currency, transaction_descriptions
 from src.processing import filter_by_state, sort_by_date
-from src.utils import financial_transactions
+from src.utils import financial_transactions, get_transactions_info_csv, get_transactions_info_excel
 from src.widget import get_mask_account_card, get_new_data
+
+current_dir = os.path.dirname(os.path.abspath(__file__))
+path_to_csv = os.path.abspath("../data/transactions.csv")
+path_to_xlsx = os.path.abspath("../data/transactions_excel.xlsx")
 
 print(get_mask_account_card("MasterCard 7158300734726758"))
 
@@ -124,3 +128,10 @@ transactions1 = financial_transactions(file_path)
 for transaction in transactions1:
     rub_amount = currency_conversion(transaction)
     print(f"Transaction amount in RUB: {rub_amount}")
+
+
+if __name__ == "__main__":
+    data = get_transactions_info_csv(path_to_csv)
+    print(data.head())
+    data = get_transactions_info_excel(path_to_xlsx)
+    print(data.head())
