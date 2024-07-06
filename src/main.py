@@ -1,137 +1,149 @@
+import datetime
 import os
-import pprint
+from typing import Any
 
-from src.external_api import currency_conversion
-from src.generators import card_number_generator, filter_by_currency, transaction_descriptions
+import pandas as pd
 from src.processing import filter_by_state, sort_by_date
-from src.utils import financial_transactions, get_transactions_info_csv, get_transactions_info_excel
-from src.widget import get_mask_account_card, get_new_data
-
-current_dir = os.path.dirname(os.path.abspath(__file__))
-path_to_csv = os.path.abspath("../data/transactions.csv")
-path_to_xlsx = os.path.abspath("../data/transactions_excel.xlsx")
-
-print(get_mask_account_card("MasterCard 7158300734726758"))
-
-print(get_mask_account_card("Счет 73654108430135874305"))
-
-print(get_new_data("2018-07-11T02:26:18.671407"))
+from src.utils import (
+    financial_transactions,
+    get_transactions_filter_by_key,
+    get_transactions_filter_by_rub,
+    get_transactions_filter_by_rub_csv,
+    get_transactions_filter_by_rub_xlsx,
+    get_transactions_info_csv,
+    get_transactions_info_excel,
+)
+from src.widget import get_mask_account_card
 
 
-transactions = [
-    {"id": 41428829, "state": "EXECUTED", "date": "2019-07-03T18:35:29.512364"},
-    {"id": 939719570, "state": "EXECUTED", "date": "2018-06-30T02:08:58.425572"},
-    {"id": 594226727, "state": "CANCELED", "date": "2018-09-12T21:27:25.241689"},
-    {"id": 615064591, "state": "CANCELED", "date": "2018-10-14T08:21:33.419441"},
-]
+def main() -> Any:
+    """Функция,которая отвечает за основную логику проекта и связывает функциональности между собой."""
+    print("Привет! Добро пожаловать в программу работы с банковскими транзакциями.")
 
-# Вызов функции со статусом по умолчанию 'EXECUTED'
-executed_transactions = filter_by_state(transactions)
-pp = pprint.PrettyPrinter()
-pp.pprint(executed_transactions)
+    while True:
+        print("Выберите необходимый пункт меню:")
+        print("1. Получить информацию о транзакциях из JSON-файла")
+        print("2. Получить информацию о транзакциях из CSV-файла")
+        print("3. Получить информацию о транзакциях из XLSX-файла")
 
-# для разделения результата
-print()
+        choice = input("Введите номер пункта: ")
 
-# Вызов функции с переданным статусом 'CANCELED'
-canceled_transactions = filter_by_state(transactions, "CANCELED")
-pp = pprint.PrettyPrinter()
-pp.pprint(canceled_transactions)
+        if choice == "1":
+            print("Для обработки выбран JSON-файл.")
+            current_dir = os.path.dirname(os.path.abspath(__file__))
+            file_path = os.path.join(current_dir, "../data", "operations.json")
+            transactions = financial_transactions(file_path)
+            break
+        elif choice == "2":
+            print("Для обработки выбран CSV-файл.")
+            current_dir = os.path.dirname(os.path.abspath(__file__))
+            file_path = os.path.join(current_dir, "../data", "transactions.csv")
+            transactions = get_transactions_info_csv(file_path)
+            break
+        elif choice == "3":
+            print("Для обработки выбран XLSX-файл.")
+            current_dir = os.path.dirname(os.path.abspath(__file__))
+            file_path = os.path.join(current_dir, "../data", "transactions_excel.xlsx")
+            transactions = get_transactions_info_excel(file_path)
+            break
 
-# для разделения результата
-print()
+        else:
+            print("Некорректный выбор. Попробуйте еще раз.")
+            continue
+    while True:
+        choice = input(
+            "Введите статус, по которому необходимо выполнить фильтрацию. "
+            "Доступные для фильтровки статусы: EXECUTED, CANCELED, PENDING:\n"
+        )
+        if choice.upper() == "CANCELED":
+            transactions_state = filter_by_state(transactions, "CANCELED")
 
-# Сортировка по убыванию даты
-sorted_transactions = sort_by_date(transactions)
-pp = pprint.PrettyPrinter()
-pp.pprint(sorted_transactions)
+            break
+        elif choice.upper() == "PENDING":
+            transactions_state = filter_by_state(transactions, "PENDING")
 
-# для разделения результата
-print()
+            break
+        elif choice.upper() == "EXECUTED":
+            transactions_state = filter_by_state(transactions)
+            break
+        else:
+            print("Некорректный выбор. Попробуйте еще раз.")
+            continue
+    while True:
+        user_input = input("Отсортировать операции по дате?  Да/Нет\n").lower()
+        if user_input == "да":
+            if (
+                input("Отсортировать по возрастанию или по убыванию?  по возрастанию/по убыванию\n").lower()
+                == "по возрастанию"
+            ):
+                transactions = sort_by_date(transactions_state, False)
+                break
 
-# Сортировка по возрастанию даты
-sorted_transactions = sort_by_date(transactions, False)
-pp = pprint.PrettyPrinter()
-pp.pprint(sorted_transactions)
-# для разделения результата
-print()
+            else:
+                transactions = sort_by_date(transactions_state)
+                break
+        elif user_input == "нет":
+            break
+        else:
+            print("Некорректный выбор. Попробуйте еще раз.")
+            continue
+    while True:
+        user_input = input("Выводить только рублевые тразакции? Да/Нет\n").lower()
+        if user_input == "да":
+            if file_path.endswith(".json"):
+                transactions = get_transactions_filter_by_rub(transactions, "RUB")
+            elif file_path.endswith(".csv"):
+                transactions = get_transactions_filter_by_rub_csv(transactions, "RUB")
+            elif file_path.endswith(".xlsx"):
+                transactions = get_transactions_filter_by_rub_xlsx(transactions, "RUB")
+            break
+        elif user_input == "нет":
+            break
+        else:
+            print("Некорректный выбор. Попробуйте еще раз.")
+            continue
+    while True:
+        user_input = input("Отфильтровать список транзакций по определенному слову в описании? Да/Нет:\n").lower()
+        if user_input == "да":
+            search_key = input("Видите слово для поиска: ")
+            transactions = get_transactions_filter_by_key(transactions, search_key)
+            break
+        elif user_input == "нет":
+            break
+        else:
+            print("Некорректный выбор. Попробуйте еще раз.")
+            continue
+    if transactions == []:
+        print("Не найдено ни одной транзакции, подходящей под ваши условия фильтрации")
+    elif len(transactions) > 0:
+        print(f"Всего банковских операций в выборке: {len(transactions)}")
 
+    for transaction in transactions:
+        date = datetime.datetime.fromisoformat(transaction["date"]).strftime("%d.%m.%Y")
+        if (
+            file_path.endswith(".json")
+            and "from" in transaction
+            and (pd.notnull(transaction["from"]) or transaction["from"] != "")
+        ):
+            from_ = get_mask_account_card(transaction["from"])
+        elif file_path.endswith(".xlsx") and "from" in transaction and pd.notnull(transaction["from"]):
+            from_ = get_mask_account_card(transaction["from"])
+        elif file_path.endswith(".csv") and "from" in transaction and transaction["from"] != "":
+            from_ = get_mask_account_card(transaction["from"])
+        else:
+            from_ = "0"
+        to_ = get_mask_account_card(transaction["to"])
+        description = transaction["description"]
+        if file_path.endswith(".json"):
+            amount = transaction["operationAmount"]["amount"]
+            currency = transaction["operationAmount"]["currency"]["name"]
+        elif file_path.endswith(".csv") or file_path.endswith(".xlsx"):
+            amount = transaction["amount"]
+            currency = transaction["currency_name"]
 
-transactions1 = [
-    {
-        "id": 939719570,
-        "state": "EXECUTED",
-        "date": "2018-06-30T02:08:58.425572",
-        "operationAmount": {"amount": "9824.07", "currency": {"name": "USD", "code": "USD"}},
-        "description": "Перевод организации",
-        "from": "Счет 75106830613657916952",
-        "to": "Счет 11776614605963066702",
-    },
-    {
-        "id": 142264268,
-        "state": "EXECUTED",
-        "date": "2019-04-04T23:20:05.206878",
-        "operationAmount": {"amount": "79114.93", "currency": {"name": "USD", "code": "USD"}},
-        "description": "Перевод со счета на счет",
-        "from": "Счет 19708645243227258542",
-        "to": "Счет 75651667383060284188",
-    },
-    {
-        "id": 873106923,
-        "state": "EXECUTED",
-        "date": "2019-03-23T01:09:46.296404",
-        "operationAmount": {"amount": "43318.34", "currency": {"name": "руб.", "code": "RUB"}},
-        "description": "Перевод со счета на счет",
-        "from": "Счет 44812258784861134719",
-        "to": "Счет 74489636417521191160",
-    },
-    {
-        "id": 895315941,
-        "state": "EXECUTED",
-        "date": "2018-08-19T04:27:37.904916",
-        "operationAmount": {"amount": "56883.54", "currency": {"name": "USD", "code": "USD"}},
-        "description": "Перевод с карты на карту",
-        "from": "Visa Classic 6831982476737658",
-        "to": "Visa Platinum 8990922113665229",
-    },
-    {
-        "id": 594226727,
-        "state": "CANCELED",
-        "date": "2018-09-12T21:27:25.241689",
-        "operationAmount": {"amount": "67314.70", "currency": {"name": "руб.", "code": "RUB"}},
-        "description": "Перевод организации",
-        "from": "Visa Platinum 1246377376343588",
-        "to": "Счет 14211924144426031657",
-    },
-]
-
-
-usd_transactions = filter_by_currency(transactions1, "USD")
-for _ in range(3):
-    print(next(usd_transactions)["id"])
-# для разделения результата
-print()
-
-descriptions = transaction_descriptions(transactions1)
-for i in range(5):
-    print(next(descriptions))
-# для разделения результата
-print()
-for card_number in card_number_generator(1, 5):
-    print(card_number)
-
-current_dir = os.path.dirname(os.path.abspath(__file__))
-file_path = os.path.join(current_dir, "../data", "operations.json")
-transactions1 = financial_transactions(file_path)
-
-
-for transaction in transactions1:
-    rub_amount = currency_conversion(transaction)
-    print(f"Transaction amount in RUB: {rub_amount}")
+        print("Распечатываю итоговый список транзакций...")
+        print(f"{date} {description}\n{from_} -> {to_}\nСумма: {amount} {currency}\n")
 
 
 if __name__ == "__main__":
-    data = get_transactions_info_csv(path_to_csv)
-    print(data.head())
-    data = get_transactions_info_excel(path_to_xlsx)
-    print(data.head())
+    main()
