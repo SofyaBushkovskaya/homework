@@ -60,26 +60,25 @@ class TestGetTransactionsCSV(unittest.TestCase):
         "4699552;EXECUTED;2022-03-23T08:29:37Z;23423;Peso;PHP;Discover 7269000803370165;"
         "American Express 1963030970727681;Перевод с карты на карту\n",
     )
-    def test_get_transactions_info_csv(self, mock_file: MagicMock) -> None:
+    def test_get_transactions_csv(self, mock_file: MagicMock) -> None:
         result = get_transactions_info_csv("test.csv")
         self.assertEqual(
             result,
-            {
-                "id;state;date;amount;currency_name;currency_code;from;to;description": {
-                    0: "4699552;EXECUTED;2022-03-23T08:29:37Z;23423;Peso;PHP;Discover "
-                    "7269000803370165;American "
-                    "Express "
-                    "1963030970727681;Перевод "
-                    "с "
-                    "карты "
-                    "на "
-                    "карту"
+            [
+                {
+                    "id": "4699552",
+                    "state": "EXECUTED",
+                    "date": "2022-03-23T08:29:37Z",
+                    "amount": "23423",
+                    "currency_name": "Peso",
+                    "currency_code": "PHP",
+                    "description": "Перевод с карты на карту",
+                    "from": "Discover 7269000803370165",
+                    "to": "American Express 1963030970727681",
                 }
-            },
+            ],
         )
 
-
-class GetTransactionsInfoExcel(unittest.TestCase):
     data = {
         "id": [4699552.0],
         "state": ["EXECUTED"],
@@ -97,19 +96,21 @@ class GetTransactionsInfoExcel(unittest.TestCase):
     df.to_excel("test.xlsx", index=False)
 
     @patch("pandas.read_excel", return_value=df)
-    def test_get_transactions_info_xlsx(self, mock_read_excel: MagicMock) -> None:
+    def test_get_transactions_xlsx(self, mock_read_excel: MagicMock) -> None:
         result = get_transactions_info_excel("test.xlsx")
         self.assertEqual(
             result,
-            {
-                "amount": {0: 23423.0},
-                "currency_code": {0: "PHP"},
-                "currency_name": {0: "Peso"},
-                "date": {0: "2022-03-23T08:29:37Z"},
-                "description": {0: "Перевод с карты на карту"},
-                "from": {0: "Discover 7269000803370165"},
-                "id": {0: 4699552.0},
-                "state": {0: "EXECUTED"},
-                "to": {0: "American Express 1963030970727681"},
-            },
+            [
+                {
+                    "id": 4699552.0,
+                    "state": "EXECUTED",
+                    "date": "2022-03-23T08:29:37Z",
+                    "amount": 23423.0,
+                    "currency_name": "Peso",
+                    "currency_code": "PHP",
+                    "description": "Перевод с карты на карту",
+                    "from": "Discover 7269000803370165",
+                    "to": "American Express 1963030970727681",
+                }
+            ],
         )
